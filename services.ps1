@@ -1,14 +1,3 @@
-﻿#Requires -Version 5.1
-<#
-    ═══════════════════════════════════════════════════════════
-      HELIUM SERVICES CLI
-      
-    ═══════════════════════════════════════════════════════════
-#>
-
-# ─────────────────────────────────────────────────────────────
-#  THEME  ·  white & black, color only where status demands it
-# ─────────────────────────────────────────────────────────────
 $script:Theme = @{
     Line    = [ConsoleColor]::DarkGray
     Head    = [ConsoleColor]::White
@@ -58,9 +47,6 @@ function Write-State {
     Write-Host $Text -ForegroundColor $script:Theme.Body
 }
 
-# ─────────────────────────────────────────────────────────────
-#  ADMIN GATE
-# ─────────────────────────────────────────────────────────────
 $isAdmin = [System.Security.Principal.WindowsPrincipal]::new([System.Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([System.Security.Principal.WindowsBuiltInRole]::Administrator)
 if (-not $isAdmin) {
     Write-Host ""
@@ -76,9 +62,7 @@ if (-not $isAdmin) {
     exit
 }
 
-# ─────────────────────────────────────────────────────────────
-#  BANNER
-# ─────────────────────────────────────────────────────────────
+
 $banner = @(
     '██╗  ██╗███████╗██╗     ██╗██╗   ██╗███╗   ███╗'
     '██║  ██║██╔════╝██║     ██║██║   ██║████╗ ████║'
@@ -105,9 +89,7 @@ try {
     Write-Host "      unable to retrieve host information" -ForegroundColor Yellow
 }
 
-# ─────────────────────────────────────────────────────────────
-#  SYSTEM BOOT TIME
-# ─────────────────────────────────────────────────────────────
+
 try {
     $bootTime = (Get-CimInstance -ClassName Win32_OperatingSystem).LastBootUpTime
     $uptime = (Get-Date) - $bootTime
@@ -119,9 +101,7 @@ try {
     Write-State "unable to retrieve boot time information" -Level BAD
 }
 
-# ─────────────────────────────────────────────────────────────
-#  CONNECTED DRIVES
-# ─────────────────────────────────────────────────────────────
+
 $drives = Get-CimInstance -ClassName Win32_LogicalDisk | Where-Object { $_.DriveType -ne 5 }
 if ($drives) {
     Write-Section "Connected Drives"
@@ -135,9 +115,7 @@ if ($drives) {
     }
 }
 
-# ─────────────────────────────────────────────────────────────
-#  SERVICE STATUS
-# ─────────────────────────────────────────────────────────────
+
 Write-Section "Service Status"
 
 $services = @(
@@ -198,9 +176,7 @@ foreach ($svc in $services) {
     Write-Host $timeText -ForegroundColor Gray
 }
 
-# ─────────────────────────────────────────────────────────────
-#  REGISTRY
-# ─────────────────────────────────────────────────────────────
+
 Write-Section "Registry"
 
 $settings = @(
@@ -223,9 +199,7 @@ foreach ($s in $settings) {
     }
 }
 
-# ─────────────────────────────────────────────────────────────
-#  EVENT LOGS
-# ─────────────────────────────────────────────────────────────
+
 function Check-EventLog {
     param ($logName, $eventID, $message)
     $event = Get-WinEvent -LogName $logName -FilterXPath "*[System[EventID=$eventID]]" -MaxEvents 1 -ErrorAction SilentlyContinue
@@ -293,9 +267,7 @@ Check-EventLog "Security" 4616 "System time changed"
 Check-EventLog "System" 6005 "Event Log Service started"
 Check-DeviceDeleted
 
-# ─────────────────────────────────────────────────────────────
-#  PREFETCH INTEGRITY
-# ─────────────────────────────────────────────────────────────
+
 $prefetchPath = "$env:SystemRoot\Prefetch"
 if (Test-Path $prefetchPath) {
     Write-Section "Prefetch Integrity"
@@ -419,9 +391,7 @@ if (Test-Path $prefetchPath) {
     Write-State "Couldnt find prefetch folder?? (check yo paths hoe)" -Level BAD
 }
 
-# ─────────────────────────────────────────────────────────────
-#  RECYCLE BIN + CONSOLE HISTORY
-# ─────────────────────────────────────────────────────────────
+
 try {
     $recycleBinPath = "$env:SystemDrive" + '\$Recycle.Bin'
 
@@ -499,9 +469,7 @@ try {
     Write-State "Error accessing system information: $($_.Exception.Message)" -Level BAD
 }
 
-# ─────────────────────────────────────────────────────────────
-#  FOOTER
-# ─────────────────────────────────────────────────────────────
+
 Write-Host ""
 Write-Host ("      " + "─" * 46) -ForegroundColor $script:Theme.Line
 Write-Host "      CHECK COMPLETE" -ForegroundColor White
